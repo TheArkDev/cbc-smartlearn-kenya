@@ -17,7 +17,11 @@ app.use('*', cors());
 app.get('/v1/health', (c) =>
   c.json({
     success: true,
-    data: { status: 'ok', jwt_secret_ok: !!c.env.JWT_SECRET && c.env.JWT_SECRET.length >= 32 },
+    data: {
+      status: 'ok',
+      jwt_secret_set: !!c.env.JWT_SECRET,
+      jwt_secret_long_enough: (c.env.JWT_SECRET ?? '').length >= 32,
+    },
   })
 );
 
