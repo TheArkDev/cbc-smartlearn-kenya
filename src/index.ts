@@ -45,6 +45,8 @@ app.route('/v1/curriculum', curriculum);
 app.route('/v1/lessons', lessons);
 app.route('/v1/assessments', assessments);
 app.route('/v1/progress', progress);
+app.route('/v1/review', review);
+
 
 app.notFound((c) => c.json({ success: false, error: 'Not found' }, 404));
 app.onError((err, c) => {
