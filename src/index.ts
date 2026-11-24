@@ -6,6 +6,7 @@ import { curriculum } from './routes/curriculum';
 import { lessons } from './routes/lessons';
 import { assessments, progress } from './routes/assessments';
 import type { AuthUser } from './guards';
+import { review } from './routes/review';
 
 export type Env = {
   Bindings: { DB: D1Database; JWT_SECRET: string };
