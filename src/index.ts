@@ -4,7 +4,7 @@ import { auth } from './routes/auth';
 import { guardians } from './routes/guardians';
 import { curriculum } from './routes/curriculum';
 import { lessons } from './routes/lessons';
-import type { AuthUser } from './lib/auth';
+import type { AuthUser } from './guards';
 
 export type Env = {
   Bindings: { DB: D1Database; JWT_SECRET: string };
