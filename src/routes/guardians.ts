@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from '../index';
-import { requireAuth, requireRole } from '../lib/auth';
+import { requireAuth, requireRole } from '../guards';
 import { hashPassword } from '../lib/crypto';
 
 export const guardians = new Hono<Env>();
