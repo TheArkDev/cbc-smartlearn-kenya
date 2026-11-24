@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import type { Env } from '../index';
-import { requireAuth } from '../lib/auth';
+import { requireAuth } from '../guards';
 import { b64u, hashPassword, sha256, signJwt, verifyPassword } from '../lib/crypto';
 
 export const auth = new Hono<Env>();
