@@ -14,7 +14,12 @@ export type Env = {
 const app = new Hono<Env>();
 app.use('*', cors());
 
-app.get('/v1/health', (c) => c.json({ success: true, data: { status: 'ok' } }));
+app.get('/v1/health', (c) =>
+  c.json({
+    success: true,
+    data: { status: 'ok', jwt_secret_ok: !!c.env.JWT_SECRET && c.env.JWT_SECRET.length >= 32 },
+  })
+);
 
 // Refuse to run account routes if the signing secret was never configured.
 app.use('/v1/auth/*', async (c, next) => {
