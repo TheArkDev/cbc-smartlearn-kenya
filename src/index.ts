@@ -4,6 +4,7 @@ import { auth } from './routes/auth';
 import { guardians } from './routes/guardians';
 import { curriculum } from './routes/curriculum';
 import { lessons } from './routes/lessons';
+import { assessments, progress } from './routes/assessments';
 import type { AuthUser } from './guards';
 
 export type Env = {
