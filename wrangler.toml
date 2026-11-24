@@ -1,0 +1,14 @@
+name = "smartlearn-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "smartlearn-db"
+database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
+migrations_dir = "migrations"
+
+# Later: R2 for media/offline packages
+# [[r2_buckets]]
+# binding = "MEDIA"
+# bucket_name = "smartlearn-media"
