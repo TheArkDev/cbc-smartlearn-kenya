@@ -5,8 +5,9 @@ import { guardians } from './routes/guardians';
 import { curriculum } from './routes/curriculum';
 import { lessons } from './routes/lessons';
 import { assessments, progress } from './routes/assessments';
-import type { AuthUser } from './guards';
 import { review } from './routes/review';
+import { learner } from './routes/learner';
+import type { AuthUser } from './guards';
 
 export type Env = {
   Bindings: { DB: D1Database; JWT_SECRET: string };
@@ -28,16 +29,14 @@ app.get('/v1/health', (c) =>
 );
 
 // Refuse to run account routes if the signing secret was never configured.
-app.use('/v1/auth/*', async (c, next) => {
+const needSecret = async (c: any, next: any) => {
   if (!c.env.JWT_SECRET || c.env.JWT_SECRET.length < 32)
     return c.json({ success: false, error: 'Server not configured' }, 500);
   await next();
-});
-app.use('/v1/guardians/*', async (c, next) => {
-  if (!c.env.JWT_SECRET || c.env.JWT_SECRET.length < 32)
-    return c.json({ success: false, error: 'Server not configured' }, 500);
-  await next();
-});
+};
+for (const p of ['/v1/auth/*', '/v1/guardians/*', '/v1/assessments/*', '/v1/progress/*', '/v1/review/*', '/v1/learner/*']) {
+  app.use(p, needSecret);
+}
 
 app.route('/v1/auth', auth);
 app.route('/v1/guardians', guardians);
@@ -46,7 +45,7 @@ app.route('/v1/lessons', lessons);
 app.route('/v1/assessments', assessments);
 app.route('/v1/progress', progress);
 app.route('/v1/review', review);
-
+app.route('/v1/learner', learner);
 
 app.notFound((c) => c.json({ success: false, error: 'Not found' }, 404));
 app.onError((err, c) => {
