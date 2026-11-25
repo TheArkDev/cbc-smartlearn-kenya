@@ -3,7 +3,6 @@ import type { Env } from '../index';
 
 export const curriculum = new Hono<Env>();
 
-// Active curriculum version id (a new version can go live without an app update).
 async function activeVersion(db: D1Database): Promise<string | null> {
   const r = await db
     .prepare("SELECT id FROM curriculum_versions WHERE status='active' ORDER BY created_at DESC LIMIT 1")
@@ -22,15 +21,15 @@ curriculum.get('/grades/:gradeId/subjects', async (c) => {
   const v = await activeVersion(c.env.DB);
   if (!v) return c.json({ success: true, data: [] });
   const { results } = await c.env.DB.prepare(
-    `SELECT gs.id AS grade_subject_id, s.id AS subject_id, s.name
+    `SELECT gs.id AS grade_subject_id, s.id AS subject_id, s.name, s.category
        FROM grade_subjects gs JOIN subjects s ON s.id = gs.subject_id
       WHERE gs.grade_id = ?1 AND gs.curriculum_version_id = ?2
-      ORDER BY s.name`
+      ORDER BY CASE s.category WHEN 'core' THEN 0 WHEN 'religious' THEN 1 ELSE 2 END, s.name`
   ).bind(c.req.param('gradeId'), v).all();
   return c.json({ success: true, data: results, curriculum_version: v });
 });
 
-// Full tree for one grade-subject: strands -> sub-strands -> outcomes (3 queries, assembled here).
+// Plain tree (no learner data). Used by the teacher quiz builder.
 curriculum.get('/grade-subjects/:id/tree', async (c) => {
   const id = c.req.param('id');
   const db = c.env.DB;

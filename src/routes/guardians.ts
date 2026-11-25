@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../index';
 import { requireAuth, requireRole } from '../guards';
 import { hashPassword } from '../lib/crypto';
+import { buildSummary } from '../lib/summary';
 
 export const guardians = new Hono<Env>();
 guardians.use('*', requireAuth, requireRole('parent'));
@@ -67,4 +68,29 @@ guardians.get('/learners', async (c) => {
       ORDER BY u.full_name`
   ).bind(c.get('user').id).all();
   return c.json({ success: true, data: results });
+});
+
+export const Q_CHILD = `
+  SELECT u.id, u.full_name, u.username, g.name AS grade_name
+    FROM learner_guardians lg
+    JOIN users u ON u.id = lg.learner_id
+    JOIN learner_profiles lp ON lp.user_id = u.id
+    JOIN grades g ON g.id = lp.grade_id
+   WHERE lg.guardian_id=?1 AND lg.learner_id=?2 AND lg.status='verified'`;
+
+export const Q_RECENT_ATTEMPTS = `
+  SELECT a.title, t.score, t.max_score, t.received_at
+    FROM assessment_attempts t JOIN assessments a ON a.id = t.assessment_id
+   WHERE t.learner_id=?1 ORDER BY t.received_at DESC LIMIT 5`;
+
+// A parent sees a progress summary only for a learner they are verified to be linked to.
+guardians.get('/learners/:id/summary', async (c) => {
+  const db = c.env.DB;
+  const child = await db.prepare(Q_CHILD).bind(c.get('user').id, c.req.param('id')).first<any>();
+  if (!child) return c.json({ success: false, error: 'Not found' }, 404);
+  const [summary, recent] = await Promise.all([
+    buildSummary(db, child.id),
+    db.prepare(Q_RECENT_ATTEMPTS).bind(child.id).all<any>(),
+  ]);
+  return c.json({ success: true, data: { child, ...summary, recent_quizzes: recent.results } });
 });

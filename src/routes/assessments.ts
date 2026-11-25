@@ -11,11 +11,13 @@ const norm = (s: unknown) => String(s ?? '').trim().toLowerCase().replace(/\s+/g
 // A learner may only see published + approved assessments for THEIR grade.
 const VISIBLE = `
   SELECT a.id, a.title, a.version, a.time_limit_minutes, a.max_attempts,
+         s.id AS subject_id, s.name AS subject_name, ss.title AS topic,
          (SELECT COUNT(*) FROM assessment_questions q WHERE q.assessment_id = a.id) AS question_count
     FROM assessments a
     JOIN sub_strands ss ON ss.id = a.sub_strand_id
     JOIN strands st ON st.id = ss.strand_id
     JOIN grade_subjects gs ON gs.id = st.grade_subject_id
+    JOIN subjects s ON s.id = gs.subject_id
    WHERE a.status = 'published' AND a.approved = 1 AND gs.grade_id = ?1`;
 
 async function learnerGrade(db: D1Database, uid: string): Promise<string | null> {
